@@ -11,5 +11,7 @@ namespace EF_Core02.Entities
         public int Inst_Id { get; set; }
         public int Course_Id { get; set; }
         public double Evaluate { get; set; }
+        public Course Course { get; set; }
+        public Instructor Instructor { get; set; }
     }
 }

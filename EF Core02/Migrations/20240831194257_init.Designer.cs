@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EF_Core02.Migrations
 {
     [DbContext(typeof(ITIDbContext))]
-    [Migration("20240831145436_Edit03")]
-    partial class Edit03
+    [Migration("20240831194257_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -116,6 +116,9 @@ namespace EF_Core02.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InstructorId")
+                        .IsUnique();
+
                     b.ToTable("Departments");
                 });
 
@@ -135,9 +138,6 @@ namespace EF_Core02.Migrations
                     b.Property<double>("Bounce")
                         .HasColumnType("float");
 
-                    b.Property<int>("ContainingDepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
@@ -153,10 +153,7 @@ namespace EF_Core02.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContainingDepartmentId");
-
-                    b.HasIndex("DepartmentId")
-                        .IsUnique();
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Instructors");
                 });
@@ -266,21 +263,24 @@ namespace EF_Core02.Migrations
                     b.Navigation("Topic");
                 });
 
+            modelBuilder.Entity("EF_Core02.Entities.Department", b =>
+                {
+                    b.HasOne("EF_Core02.Entities.Instructor", "manager")
+                        .WithOne("managedDepartment")
+                        .HasForeignKey("EF_Core02.Entities.Department", "InstructorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("manager");
+                });
+
             modelBuilder.Entity("EF_Core02.Entities.Instructor", b =>
                 {
-                    b.HasOne("EF_Core02.Entities.Department", "ContainingDepartment")
-                        .WithMany("Instructors")
-                        .HasForeignKey("ContainingDepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("EF_Core02.Entities.Department", "Department")
-                        .WithOne("Instructor")
-                        .HasForeignKey("EF_Core02.Entities.Instructor", "DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Instructors")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("ContainingDepartment");
 
                     b.Navigation("Department");
                 });
@@ -302,12 +302,15 @@ namespace EF_Core02.Migrations
 
             modelBuilder.Entity("EF_Core02.Entities.Department", b =>
                 {
-                    b.Navigation("Instructor")
-                        .IsRequired();
-
                     b.Navigation("Instructors");
 
                     b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Instructor", b =>
+                {
+                    b.Navigation("managedDepartment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EF_Core02.Entities.Stud_Course", b =>

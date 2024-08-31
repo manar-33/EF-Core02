@@ -10,8 +10,8 @@ namespace EF_Core02.Entities
     {
         public int Student_Id { get; set; }
         public int Course_Id { get; set; }
-        public List<Student>Students { get; set; }
-        public List<Course>Courses { get; set; }
+        public Student Student { get; set; }
+        public Course Course { get; set; }
         public int Grade { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace EF_Core02.Entities
         public double HourRate { get; set; }
         public int DepartmentId { get; set; }
         public Department Department { get; set; }
-        public Department ContainingDepartment { get; set; }
+        public Department managedDepartment { get; set; }
+        public List<Course_Inst> CourseInstructors { get; set; }
     }
 }

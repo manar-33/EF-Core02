@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EF_Core02.Migrations
 {
     [DbContext(typeof(ITIDbContext))]
-    [Migration("20240830140250_Edit")]
-    partial class Edit
+    [Migration("20240831200636_add many to many relations")]
+    partial class addmanytomanyrelations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,10 +45,12 @@ namespace EF_Core02.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Top_Id")
+                    b.Property<int>("TopicId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TopicId");
 
                     b.ToTable("Courses");
                 });
@@ -67,6 +69,8 @@ namespace EF_Core02.Migrations
                     b.HasKey("Course_Id", "Inst_Id")
                         .HasName("PK_Course_Inst");
 
+                    b.HasIndex("Inst_Id");
+
                     b.ToTable("Course_Insts");
                 });
 
@@ -81,7 +85,7 @@ namespace EF_Core02.Migrations
                     b.Property<DateTime>("HiringDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Inst_Id")
+                    b.Property<int>("InstructorId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -90,6 +94,9 @@ namespace EF_Core02.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("InstructorId")
+                        .IsUnique();
 
                     b.ToTable("Departments");
                 });
@@ -110,7 +117,7 @@ namespace EF_Core02.Migrations
                     b.Property<double>("Bounce")
                         .HasColumnType("float");
 
-                    b.Property<int>("Dept_Id")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<double>("HourRate")
@@ -125,19 +132,26 @@ namespace EF_Core02.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.ToTable("Instructors");
                 });
 
             modelBuilder.Entity("EF_Core02.Entities.Stud_Course", b =>
                 {
-                    b.Property<int>("Stud_Id")
-                        .HasColumnType("int");
-
                     b.Property<int>("Course_Id")
                         .HasColumnType("int");
 
-                    b.HasKey("Stud_Id", "Course_Id")
+                    b.Property<int>("Student_Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Grade")
+                        .HasColumnType("int");
+
+                    b.HasKey("Course_Id", "Student_Id")
                         .HasName("PK_Stud_Course");
+
+                    b.HasIndex("Student_Id");
 
                     b.ToTable("Stud_Courses");
                 });
@@ -152,26 +166,25 @@ namespace EF_Core02.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
-                    b.Property<int>("Dep_Id")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("FName")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LName")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Students");
                 });
@@ -191,6 +204,120 @@ namespace EF_Core02.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Topics");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Course", b =>
+                {
+                    b.HasOne("EF_Core02.Entities.Topic", "Topic")
+                        .WithMany("Courses")
+                        .HasForeignKey("TopicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topic");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Course_Inst", b =>
+                {
+                    b.HasOne("EF_Core02.Entities.Course", "Course")
+                        .WithMany("CourseInstructors")
+                        .HasForeignKey("Course_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EF_Core02.Entities.Instructor", "Instructor")
+                        .WithMany("CourseInstructors")
+                        .HasForeignKey("Inst_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Instructor");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Department", b =>
+                {
+                    b.HasOne("EF_Core02.Entities.Instructor", "manager")
+                        .WithOne("managedDepartment")
+                        .HasForeignKey("EF_Core02.Entities.Department", "InstructorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("manager");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Instructor", b =>
+                {
+                    b.HasOne("EF_Core02.Entities.Department", "Department")
+                        .WithMany("Instructors")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Stud_Course", b =>
+                {
+                    b.HasOne("EF_Core02.Entities.Course", "Course")
+                        .WithMany("StudentCourses")
+                        .HasForeignKey("Course_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EF_Core02.Entities.Student", "Student")
+                        .WithMany("StudentCourses")
+                        .HasForeignKey("Student_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Student", b =>
+                {
+                    b.HasOne("EF_Core02.Entities.Department", "Department")
+                        .WithMany("Students")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Course", b =>
+                {
+                    b.Navigation("CourseInstructors");
+
+                    b.Navigation("StudentCourses");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Department", b =>
+                {
+                    b.Navigation("Instructors");
+
+                    b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Instructor", b =>
+                {
+                    b.Navigation("CourseInstructors");
+
+                    b.Navigation("managedDepartment")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Student", b =>
+                {
+                    b.Navigation("StudentCourses");
+                });
+
+            modelBuilder.Entity("EF_Core02.Entities.Topic", b =>
+                {
+                    b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618
         }

@@ -14,6 +14,7 @@ namespace EF_Core02.Entities
         public double Duration { get; set; }
         public int TopicId { get; set; }
         public Topic Topic { get; set; }
-        public List<Student> Students { get; set; }
+        public List<Stud_Course> StudentCourses { get; set; }
+        public List<Course_Inst> CourseInstructors { get; set; }
     }
 }

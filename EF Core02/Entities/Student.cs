@@ -26,6 +26,6 @@ namespace EF_Core02.Entities
         public int Age { get; set; }
         public int DepartmentId { get; set; }
         public Department Department { get; set; }
-        public List<Course>Courses { get; set; }
+        public List<Stud_Course> StudentCourses { get; set; }
     }
 }

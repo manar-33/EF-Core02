@@ -14,6 +14,6 @@ namespace EF_Core02.Entities
         public DateTime HiringDate { get; set; }
         public List<Student> Students { get; set; }
         public List<Instructor> Instructors { get; set; }
-        public Instructor Instructor{ get; set; }
+        public Instructor manager{ get; set; } 
     }
 }
